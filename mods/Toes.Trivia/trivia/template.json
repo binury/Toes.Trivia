@@ -1,0 +1,31 @@
+{
+  "name": "Trivia Template",
+  "uid": "my_code",
+  "description": "This description should express to ohers the unique traits of your custom trivia set. You can delete me safely.",
+  "config": {},
+  "content": [
+    {
+        "question": "What is the usefulness of a custom Trivia set's UID?",
+        "correct_answer": "You can use it to reference/select the trivia set in-game",
+        "alt_answers": [
+            "Typing convenience"
+        ],
+        "incorrect_answers": [
+            "Mike Myers",
+            "Who cares!",
+            "I can't read"
+        ]
+    },
+    {
+      "question": "Which of these is a true statement?",
+      "correct_answer": "`needs_choices` should always be used for questions that have too much ambiguity",
+      "incorrect_answers": [
+        "Mysterious and opaque questions are fun to try and guess",
+        "Stamps/Stamp-Mod is safe to download and will NOT infect your computer with any viruses",
+        "Trivia questions and answers can be written to unlimited character length",
+        "Hardcore players like questions that are unfair and hard"
+      ],
+      "needs_choices": false
+    }
+  ]
+}

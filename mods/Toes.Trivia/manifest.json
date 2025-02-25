@@ -1,0 +1,11 @@
+{
+  "Id": "Toes.Trivia",
+  "PackPath": "Toes.Trivia.pck",
+  "Dependencies": ["Toes.Socks"],
+  "Metadata": {
+    "Name": "Trivia",
+    "Author": "Toes",
+    "Version": "0.9.4",
+    "Description": "[Experimental] Play trivia in chat while you fish | Now with Custom Trivia™ and Game Modifiers™!"
+  }
+}
