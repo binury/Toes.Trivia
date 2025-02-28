@@ -105,7 +105,7 @@ You must create the folder if it does not already exist. You will place one (`.j
         "Trivia questions and answers can be written to unlimited character length",
         "Hardcore players like questions that are unfair and hard"
       ],
-      "needs_choices": false
+      "needs_choices": true
     }
   ]
 }
