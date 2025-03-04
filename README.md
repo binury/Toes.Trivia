@@ -133,6 +133,14 @@ You must create the folder if it does not already exist. You will place one (`.j
 
 ## Changelog
 
+### 0.9.5
+- **New** Added __typo tolerance__ for guess validation (experimental; feedback welcome!)
+- **Fixed** Issues caused by special characters^[àâäáãåéèêëìíîïöôóòõùúûñÿ] in answers/questions
+  - These should no longer break questions
+  - You will still need to provide alt-answers _without_ special characters, if you want to show them to players and have them answer with regular characters
+- **Change**d `alt answers` to no longer appear when trivia has multiple-choice enabled through `shown_choices`
+
+
 ### 0.9.4
 - Fixed default trivia category being locked to animals. Sorry!
 - **Fixed (custom trivia) questions being repeated in subsequent rounds**

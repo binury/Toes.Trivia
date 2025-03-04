@@ -14,6 +14,8 @@ const SURVIVAL_DEATH_THRESHOLD = 0 - SURVIVAL_BASE_POINTS
 
 const STEAL_TIME_WINDOW = 3500
 
+const AFFIRMATIONS = ["Correct", "Bingo", "Nicely done", "Ayo", "Ace", "Nailed it"]
+
 var http_request
 
 ## Cache of custom trivia sets
@@ -140,7 +142,7 @@ func _init() -> void:
 	for trivia in metadata.get("trivias", []):
 		custom_trivias[trivia.uid] = trivia.path
 	var configured_default = metadata.get("default", "none")
-	if configured_default != "none" :
+	if configured_default != "none":
 		if configured_default in custom_trivias.keys():
 			active_custom_trivia = configured_default
 			current_trivia_set = load_trivia_set(configured_default).content
@@ -196,7 +198,9 @@ func _get_trivia_files_list(refresh = false) -> Dictionary:
 					_log(old_metafile_text)
 					var old_config := JSON.parse(old_metafile_text)
 					if old_config.error == OK:
-						existing_default_set = old_config.result.get("default", existing_default_set)
+						existing_default_set = old_config.result.get(
+							"default", existing_default_set
+						)
 					old_metafile.close()
 					file_name = dir.get_next()
 					continue
@@ -256,7 +260,10 @@ func load_trivia_set(uid_or_file: String) -> Trivia.TriviaSet:
 	var trivia_file := File.new()
 	if !trivia_file.file_exists(path):
 		Chat.write(
-			"Missing trivia files for %s! Did you recently rename them without updating the cache?" % path
+			(
+				"Missing trivia files for %s! Did you recently rename them without updating the cache?"
+				% path
+			)
 		)
 #		breakpoint
 		return null
@@ -273,6 +280,7 @@ func load_trivia_set(uid_or_file: String) -> Trivia.TriviaSet:
 
 
 func _process(dt):
+	# breakpoint
 	if not trivia_is_running or state == "paused":
 		return
 
@@ -323,7 +331,11 @@ func _process(dt):
 			var answer = current_answers[0]
 			if Time.get_ticks_msec() >= current_expiration:
 				if _modifier_is_active("bucket_crab") and not current_round_winners.empty():
-					_announce("Well done! It was: " + answer)
+					_announce(
+						"{affirmation} It was: {answer}.".format(
+							{"affirmation": sample(AFFIRMATIONS), "answer": answer}
+						)
+					)
 					_finish_round("answer")
 				else:
 					_announce("Oh well. The answer was: " + answer)
@@ -423,9 +435,9 @@ func _load_offline_question():
 
 	if current_trivia_set.empty():
 		Chat.notify("Warning: There are 0 trivia questions left in the bank!")
-		yield(get_tree().create_timer(0.5), "timeout")
+		yield(get_tree().create_timer(1.5), "timeout")
 		Chat.notify("Ending trivia match early, since there are no unused questions left")
-		yield(get_tree().create_timer(0.5), "timeout")
+		yield(get_tree().create_timer(1.5), "timeout")
 		Chat.notify("To reload the questions again or switch to a new trivia set type `!use [uid]`")
 
 		return _finish_trivia()
@@ -433,21 +445,21 @@ func _load_offline_question():
 	current_trivia_set.shuffle()
 	var trivia = current_trivia_set.pop_back()
 
-
-	current_question = _unescape(trivia["question"]).dedent()
-	current_answers = [_unescape(trivia["correct_answer"]).dedent()]
-
-	var alt_answers = trivia.get("alt_answers", [])
-	for aa in alt_answers:
-		current_answers.append(aa)
+	current_question = trivia["question"].dedent()
+	current_answers = [trivia["correct_answer"].dedent()]
 
 	var wrong_answers = []
 	for wanswer in trivia["incorrect_answers"]:
-		wrong_answers.append(_unescape(wanswer).dedent())
+		wrong_answers.append(wanswer.dedent())
 	current_wrong_answers = wrong_answers
 	current_options = current_answers + current_wrong_answers
 	current_options.shuffle()
 	current_trivia_needs_multiple_choice = trivia.get("needs_choices", false)
+
+	# Do this last to exclude alt answers from choices
+	var alt_answers = trivia.get("alt_answers", [])
+	for aa in alt_answers:
+		current_answers.append(aa)
 
 	state = "loaded"
 	_log("Done loading offline trivia question")
@@ -614,7 +626,6 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 					active_custom_trivia = target_set
 					_announce("OK! Using custom trivia set " + target_set)
 
-
 		# if message.begins_with("!tip"):
 		#     var args = Array(message.split(" ")).slice(1, -1)
 		#     if args.empty():
@@ -748,6 +759,11 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 	if state == "listening":
 		if is_self or not is_self:
 			if message.begins_with("!skip"):
+				# Ignore skips for
+				var time_left = current_expiration - Time.get_ticks_msec()
+				if time_left <= 15 * 1000:
+					_announce("Too late to skip!")
+					return
 				Chat.notify("Trivia question was skipped")
 				_announce("ˢᵏⁱᵖᵖᵉᵈ")
 				_finish_round("skip")
@@ -755,8 +771,15 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 				return
 
 		var guess = message.to_lower()
+		var SIMILARITY_SCORE_THRESHOLD = 0.88
 		for answer in current_answers:
-			if answer.to_lower() in guess:
+			var guess_similarity_score = guess.similarity(answer.to_lower())
+#			if true or guess_similarity_score >= SIMILARITY_SCORE_THRESHOLD:
+#				prints(answer, guess, guess_similarity_score)
+			if (
+				answer.to_lower() in guess
+				or (answer.length() >= 8 and guess_similarity_score > SIMILARITY_SCORE_THRESHOLD)
+			):
 				var was_first_guesser = current_round_winners.empty()
 				current_round_winners.append(player_name)
 				if _modifier_is_active("bucket_crab"):
@@ -767,12 +790,9 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 						current_expiration = Time.get_ticks_msec() + STEAL_TIME_WINDOW
 					_announce("Answer found! Lock in your final guess, quickly.")
 				else:
-					var affirmations = [
-						"Correct", "Bingo", "Nicely done", "Ayo", "Ace", "Nailed it"
-					]
 					_announce(
 						"{msg} - answer was: {answer}".format(
-							{"msg": sample(affirmations), "answer": answer}
+							{"msg": sample(AFFIRMATIONS), "answer": answer}
 						)
 					)
 					_finish_round("answer")
@@ -793,12 +813,13 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 
 
 func _unescape(string: String) -> String:
+	# breakpoint
 	return string.http_unescape().xml_unescape()
 
 
 func _format_answer_hint(answer: String, hint_count: int = -1) -> String:
 	var hint := ""
-	var characters := "abcdefghijklmnopqrstuvwxyz1234567890àâäéèêëîïöôùû"
+	var characters := "abcdefghijklmnopqrstuvwxyz1234567890àâäáãåéèêëìíîïöôóòõùúûñÿ"
 	var blanks := answer.length()
 
 	var answer_ineligible := blanks <= 2 or !_modifier_is_active("freebies")
