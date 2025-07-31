@@ -332,7 +332,7 @@ func _process(dt):
 			if Time.get_ticks_msec() >= current_expiration:
 				if _modifier_is_active("bucket_crab") and not current_round_winners.empty():
 					_announce(
-						"{affirmation} It was: {answer}.".format(
+						"{affirmation}! It was: {answer}.".format(
 							{"affirmation": sample(AFFIRMATIONS), "answer": answer}
 						)
 					)
@@ -403,7 +403,7 @@ func _load_question(result, response_code, headers, body):
 
 	if json.result.response_code == 5:
 		# Throttled
-		yield(get_tree().create_timer(5), "timeout")
+		yield (get_tree().create_timer(5), "timeout")
 		return _fetch_question()
 
 	_log(json.result)
@@ -435,9 +435,9 @@ func _load_offline_question():
 
 	if current_trivia_set.empty():
 		Chat.notify("Warning: There are 0 trivia questions left in the bank!")
-		yield(get_tree().create_timer(1.5), "timeout")
+		yield (get_tree().create_timer(1.5), "timeout")
 		Chat.notify("Ending trivia match early, since there are no unused questions left")
-		yield(get_tree().create_timer(1.5), "timeout")
+		yield (get_tree().create_timer(1.5), "timeout")
 		Chat.notify("To reload the questions again or switch to a new trivia set type `!use [uid]`")
 
 		return _finish_trivia()
@@ -495,20 +495,18 @@ func _finish_round(by: String) -> void:
 		var points_to_award = 4 if current_trivia_needs_multiple_choice else 12
 		if _modifier_is_active("survival"):
 			points_to_award = points_to_award / 4
-		var SHOULD_SHARE_EQUALLY = true  # TODO
+		var SHOULD_DISTRIBUTE = not current_trivia_needs_multiple_choice
 		if current_round_winners.size() < 2:
 			_adjust_player_score(current_round_winners[0], points_to_award)
-			_announce(str(points_to_award) + " points awarded to: " + current_round_winners[0])
-		elif SHOULD_SHARE_EQUALLY:
-			var per_player_points = int(floor(points_to_award / current_round_winners.size()))
-			per_player_points = max(per_player_points, 1) as int
-			var winner_list = ""
-			for player in current_round_winners:
-				_adjust_player_score(player, per_player_points)
-				winner_list += (player + " ")
-			_announce(
-				str(per_player_points) + " points ea. awarded to: " + winner_list.trim_suffix(" ")
-			)
+			_announce(str(points_to_award) + " points go to: " + current_round_winners[0])
+		elif SHOULD_DISTRIBUTE:
+			var winner_list = "Points to: "
+			for player_idx in range(current_round_winners.size()):
+				var playerName = current_round_winners[player_idx]
+				var points_given = max((9 - (2 * player_idx)), 1) # 9, 7, 5, 3, 1
+				_adjust_player_score(playerName, points_given)
+				winner_list += (playerName + " +" + str(points_given) + ", ")
+			_announce(winner_list.trim_suffix(", "))
 
 
 func _next_round() -> void:
@@ -561,9 +559,9 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 					(
 						"ᴰᴵᶠᶠᴵᶜᵁᴸᵀʸ  ⁻ "
 						+ format[difficulty]
-						+ " | ᴹᴼᴰᴱ ⁻ "
+						+" | ᴹᴼᴰᴱ ⁻ "
 						+ format[mode]
-						+ " | ᶜᵃᵗᵉᵍᵒʳʸ ⁻ ᵃⁿʸ"
+						+" | ᶜᵃᵗᵉᵍᵒʳʸ ⁻ ᵃⁿʸ"
 					)
 				)
 			else:
@@ -573,7 +571,7 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 			Chat.write("To skip a question: [rainbow]!skip[/rainbow]")
 			Chat.write("To pause: [rainbow]!pause[/rainbow] Or resume: [rainbow]!resume[/rainbow]")
 			_reset_timers()
-			_scores.clear()  # TODO: This is redundant; remove
+			_scores.clear() # TODO: This is redundant; remove
 			rounds_completed = 0
 			trivia_is_running = true
 			_next_round()
@@ -619,7 +617,7 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 					Chat.write(
 						(
 							"Unable to find that Trivia set or it was empty when loaded... Available sets: "
-							+ " ".join(custom_trivias.keys())
+							+" ".join(custom_trivias.keys())
 						)
 					)
 				else:
@@ -770,16 +768,57 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 				_reset_timers()
 				return
 
-		var guess = message.to_lower()
-		var SIMILARITY_SCORE_THRESHOLD = 0.88
+		var NEARBY_KEYS = {
+			"q": "wa",
+			"w": "sqe",
+			"e": "wrd",
+			"r": "efy",
+			"t": "ryg",
+			"y": "tuh",
+			"u": "yij",
+			"i": "oku",
+			"o": "pli",
+			"p": "ol",
+			"a": "szq",
+			"s": "awdx",
+			"d": "fces",
+			"f": "gvrd",
+			"g": "ftyvhb",
+			"h": "jnygub",
+			"j": "nhuikm",
+			"k": "loijm",
+			"l": "kpo",
+			"z": "axs",
+			"x": "czds",
+			"c": "xvfd",
+			"v": "cbfg",
+			"b": "vngh",
+			"n": "bmhj",
+			"m": "nkj",
+		}
+
+		var guess := message.to_lower()
 		for answer in current_answers:
-			var guess_similarity_score = guess.similarity(answer.to_lower())
-#			if true or guess_similarity_score >= SIMILARITY_SCORE_THRESHOLD:
-#				prints(answer, guess, guess_similarity_score)
-			if (
-				answer.to_lower() in guess
-				or (answer.length() >= 8 and guess_similarity_score > SIMILARITY_SCORE_THRESHOLD)
-			):
+			var perfect_match: bool = answer.to_lower() in guess
+			var imperfect_match := false
+			if not perfect_match:
+				var SIM_THRESH := 0.9
+				var MAX_TYPOS := 2
+				if guess.similarity(answer) >= SIM_THRESH:
+					var typo_count := 0
+					var unlikely_to_typo := false
+					for i in range(guess.length()):
+						var expected: String = answer[i]
+						var given := guess[i]
+						if given == expected: continue
+						typo_count += 1
+						if typo_count > 2: break
+						var nearby = NEARBY_KEYS.get(given)
+						if expected in nearby: continue
+						unlikely_to_typo = true
+					imperfect_match = typo_count <= 2 and not unlikely_to_typo
+
+			if (perfect_match or imperfect_match):
 				var was_first_guesser = current_round_winners.empty()
 				current_round_winners.append(player_name)
 				if _modifier_is_active("bucket_crab"):
@@ -788,7 +827,7 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 					var time_left = current_expiration - Time.get_ticks_msec()
 					if time_left > STEAL_TIME_WINDOW:
 						current_expiration = Time.get_ticks_msec() + STEAL_TIME_WINDOW
-					_announce("Answer found! Lock in your final guess, quickly.")
+					# _announce("Answer found! Lock in your final guess, quickly.")
 				else:
 					_announce(
 						"{msg} - answer was: {answer}".format(
