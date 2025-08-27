@@ -624,30 +624,6 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 					active_custom_trivia = target_set
 					_announce("OK! Using custom trivia set " + target_set)
 
-		# if message.begins_with("!tip"):
-		#     var args = Array(message.split(" ")).slice(1, -1)
-		#     if args.empty():
-		#         Chat.write("usage of tip is !tip (playerName)")
-		#     else:
-		#         var target = Players.find(args[0])
-		#         if !is_instance_valid(target):
-		#             Chat.send_as("(Tipbot)", "There's nobody here by that name...")
-		#         else:
-		#             var tithe = PlayerData.money * 0.02
-		#             PlayerData.money -= tithe
-		#             Chat.send_as(
-		#                 "(Tipbot)",
-		#                 (
-		#                     Players.get_username(Players.local_player).capitalize()
-		#                     + " tipped "
-		#                     + args[0].capitalize()
-		#                     + " "
-		#                     + str(tithe)
-		#                     + " fishbucks (2%)"
-		#                 )
-		#             )
-		#     pass
-
 		if message.begins_with("!mode"):
 			var args = Array(message.split(" ")).slice(1, -1)
 			if args.empty():
