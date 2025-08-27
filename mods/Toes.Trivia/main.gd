@@ -744,6 +744,14 @@ func _on_player_messaged(message: String, player_name: String, is_self: bool) ->
 				_reset_timers()
 				return
 
+		###########
+		# GUESSES #
+		###########
+
+		# No need to re-award points
+		if player_name in current_round_winners:
+			return
+
 		var NEARBY_KEYS = {
 			"q": "wa",
 			"w": "sqe",
