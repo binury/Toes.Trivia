@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.1
+
+- [Rolled back breaking changes to typo tolerance](#0100). Sorry! Will revisit these again soon...
+
 ## 0.10.0
 
 - You can no longer win a round twice by guessing the answer twice.

@@ -105,23 +105,16 @@ You must create the folder if it does not already exist. You will place one (`.j
 }
 ```
 
-## Roadmap
+## Project
 
-1. Configurable difficulty, mode, categories
-2. Custom trivia questions can be imported and loaded by user
-3. Enhancements and bug fixes
+### [Contributing - pull requests welcomed](https://github.com/binury/Toes.Trivia/pulls)
 
-## Known issues
+### [Known Issues](https://github.com/binury/Toes.Trivia/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen)
 
-- Timers and mode/difficulty and category settings are defaulted and non-configurable
-- **Questions and answers may contain unescaped HTML codes**
-- Leaving a match with trivia running (instead of stopped) may not end trivia session as expected
-- Points are awarded for correct answers later than expected (when using !score or !stop)
-  - Fixed?
-- If a player's name changes they will be considered a new player
-- Players who leave are still included in the score report
-- Score ties are considered or indicated in the score ranking/order
-- Pausing does not halt the progression of the trivia question timeout timer
+### [Report an issue / Feedback](https://discord.gg/kjf3FCAMDb)
+
+### [Roadmap and feature requests](https://github.com/binury/Toes.Trivia/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3Aenhancement)
+
 
 ## License
 
