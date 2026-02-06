@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.10.2
+
+- Fixed end-of-game scores not announcing until _after_ next-round timeout expires. They should announce very shortly after the final round now.
+- Added link to Modfishing Discord; come [join us](https://discord.gg/Sc2hNmunrQ) and share your custom Trivia sets!
+
 ## 0.10.1
 
 - [Rolled back breaking changes to typo tolerance](#0100). Sorry! Will revisit these again soon...

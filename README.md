@@ -23,42 +23,32 @@ To begin a Trivia session, type `!start` into the chat.
 
 There are an assortment of modifiers for you to play in very different and exciting ways. Here are the modifiers you can enable or disable according to your own proclivities:
 
-```
+```json
 {
-    "hints":
-    {
-        "description":
-        "Only for the most hardcore or specific circumstances. The game is much less fun without the hints! I warned you...",
-        "active": true
-    },
+  "hints": {
+    "description": "Only for the most hardcore or specific circumstances. The game is much less fun without the hints! I warned you...",
+    "active": true
+  },
 
-    "freebies":
-    {
-        "description":
-        "Like Wheel Of Fortune, some blanks will reveal their letters, depending on how looong the answer is. Hints must be active!",
-        "active": true
-    },
+  "freebies": {
+    "description": "Like Wheel Of Fortune, some blanks will reveal their letters, depending on how looong the answer is. Hints must be active!",
+    "active": true
+  },
 
-    "lifeline":
-    {
-        "description":
-        "A 'SUPER-HINT' lifeline is provided if nobody has guessed by the time the countdown reaches 10-seconds remaining.",
-        "active": true
-    },
+  "lifeline": {
+    "description": "A 'SUPER-HINT' lifeline is provided if nobody has guessed by the time the countdown reaches 10-seconds remaining.",
+    "active": true
+  },
 
-    "survival":
-    {
-        "description":
-        "Just make it to the end! Blind (incorrect) guesses will cost you 1 point! Before you try it- biding time will cost you too. Don't get TOO low... or you're OUT!!",
-        "active": false
-    },
+  "survival": {
+    "description": "Just make it to the end! Blind (incorrect) guesses will cost you 1 point! Before you try it- biding time will cost you too. Don't get TOO low... or you're OUT!!",
+    "active": false
+  },
 
-    "bucket_crab":
-    {
-        "description":
-        "Permits a tiny time window following anyone's correct guess wherein others -who may have been still typing- now have a final chance (very brief!) to lock in to take a 'share' of the round's points",
-        "active": true
-    }
+  "bucket_crab": {
+    "description": "Permits a tiny time window following anyone's correct guess wherein others -who may have been still typing- now have a final chance (very brief!) to lock in to take a 'share' of the round's points",
+    "active": true
+  }
 }
 ```
 
@@ -115,16 +105,15 @@ You must create the folder if it does not already exist. You will place one (`.j
 
 ### [Roadmap and feature requests](https://github.com/binury/Toes.Trivia/issues?q=sort%3Aupdated-desc%20is%3Aissue%20is%3Aopen%20label%3Aenhancement)
 
-
 ## License
 
 This project is licensed under the [Apache License 2.0](./LICENSE.txt).
 
 That means you’re free to use, fork, modify, and even commercialize this project, as long as you:
 
-- Keep the copyright notice and license text with the code  
-- Give credit where it’s due  
-- State any significant changes you’ve made  
-- Accept that the software is provided “as-is” with no warranty  
+- Keep the copyright notice and license text with the code
+- Give credit where it’s due
+- State any significant changes you’ve made
+- Accept that the software is provided “as-is” with no warranty
 
 For the full details, see the [LICENSE](./LICENSE.txt) file.
