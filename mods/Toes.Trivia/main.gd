@@ -28,7 +28,7 @@ const SURVIVAL_DEATH_THRESHOLD = 0 - SURVIVAL_BASE_POINTS
 
 const STEAL_TIME_WINDOW = 3500
 
-const AFFIRMATIONS = ["Correct", "Bingo", "Nicely done", "Ayo", "Ace", "Nailed it"]
+const AFFIRMATIONS = ["Correct", "Ba-Bingo", "Nicely done", "Ayo", "Ace", "Nailed it"]
 
 var http_request
 
@@ -375,12 +375,18 @@ func _process(dt):
 		"finished_by_timeout":
 			if last_round_ended_at + MODES[mode].COOLDOWN_TIME > Time.get_ticks_msec():
 				return
+			if rounds_completed + 1 > max_rounds:
+				_finish_trivia()
+				return
 			_next_round()
 
 		## Trivia round completed
 		## -> Loading
 		"finished_by_answer":
 			if last_round_ended_at + MODES[mode].COOLDOWN_TIME > Time.get_ticks_msec():
+				return
+			if rounds_completed + 1 > max_rounds:
+				_finish_trivia()
 				return
 			_next_round()
 
@@ -525,9 +531,6 @@ func _finish_round(by: String) -> void:
 
 func _next_round() -> void:
 	# TODO TRIVIA TIE SHOWDOWN?!
-	if rounds_completed + 1 > max_rounds:
-		_finish_trivia()
-		return
 	state = "loading"
 	current_round_winners.clear()
 
@@ -952,7 +955,9 @@ func _announce_scores(is_final_round = false) -> void:
 func _finish_trivia() -> void:
 	trivia_is_running = false
 	state = ""
+	yield (get_tree().create_timer(5), "timeout")
 	_announce_scores(true)
+	yield (get_tree().create_timer(1), "timeout")
 	_announce(
 		"ᵀʰᵃⁿᵏˢ ᶠᵒʳ ᵖˡᵃʸⁱⁿᵍ! ᵀʳⁱᵛⁱᵃ ⁱˢ ⁱⁿ ᴮᴱᵀᴬ. ᴾˡᵉᵃˢᵉ ʳᵉᵃᶜʰ ᵒᵘᵗ ᵗᵒ @ᵗᵒᵉˢ ᵗᵒ ʳᵉᵖᵒʳᵗ ⁱˢˢᵘᵉˢ ᵒʳ ˢʰᵃʳᵉ ᶠᵉᵉᵈᵇᵃᶜᵏ https://discord.gg/Sc2hNmunrQ"
 	)
